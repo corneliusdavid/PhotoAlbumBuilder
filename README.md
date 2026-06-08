@@ -3,7 +3,7 @@
 A fast, incremental static site generator for family photo albums, written in Delphi.  
 Built as a replacement for a Hugo-based photo site that had grown to 26,000 files and multi-hour build times.
 
-| Note: Except for this paragraph, the entire application and this README were written by Claude Code with very few syntax corrections (used `published` instead of `public` in project-level classes; didn't use `CharInSet` for checking characters in 
+> Note: Except for this paragraph, the entire application and this README were written by Claude Code with very few corrections (used `published` instead of `public` in project-level classes; didn't use `CharInSet` for checking characters in a set; remove `inline` in a couple of places).
 
 ---
 
