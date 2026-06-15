@@ -60,7 +60,12 @@ type
       Runs on every build (it is cheap and idempotent). }
     procedure SyncThemeAssets;
 
-    { Copies theme fonts and category icons into output\assets\.
+    { Copies a single category cover icon (referenced by a category's
+      albumthumb, e.g. "gallery_icons/x.png") from AssetsPath into
+      output\assets\icons\. Copy-if-newer; skipped on --dry-run. }
+    procedure CopyCategoryIcon(const AThumbRef: string);
+
+    { Copies theme fonts into output\assets\.
       Only called when --force is set. }
     procedure CopyStaticAssets;
 
@@ -161,6 +166,35 @@ begin
                  [LCopied, LSkipped, LDestRoot]));
 end;
 
+procedure TGenerator.CopyCategoryIcon(const AThumbRef: string);
+var
+  LSrc:  string;
+  LDest: string;
+begin
+  if FConfig.DryRun or AThumbRef.IsEmpty then
+    Exit;
+
+  LSrc  := TPath.Combine(FConfig.AssetsPath,
+             AThumbRef.Replace('/', TPath.DirectorySeparatorChar));
+  LDest := TPath.Combine(FConfig.OutputPath,
+             TPath.Combine('assets',
+               TPath.Combine('icons', TPath.GetFileName(AThumbRef))));
+
+  if not TFile.Exists(LSrc) then
+  begin
+    Writeln('  warning: category icon not found: ', LSrc);
+    Exit;
+  end;
+
+  if FConfig.ForceRebuild or
+     not TFile.Exists(LDest) or
+     (TFile.GetLastWriteTimeUtc(LSrc) > TFile.GetLastWriteTimeUtc(LDest)) then
+  begin
+    TDirectory.CreateDirectory(TPath.GetDirectoryName(LDest));
+    TFile.Copy(LSrc, LDest, {overwrite=}True);
+  end;
+end;
+
 procedure TGenerator.CopyStaticAssets;
 
   { Copy every file in ASrcDir into ADestDir, creating ADestDir if needed.
@@ -206,9 +240,8 @@ begin
   CopyDir(TPath.Combine(LTheme, TPath.Combine('static', TPath.Combine('fonts', 'ssp'))),
           TPath.Combine(LOut, TPath.Combine('fonts', 'ssp')));
 
-  { Category icons (gallery_icons/ under AssetsPath → assets/icons/) }
-  CopyDir(TPath.Combine(FConfig.AssetsPath, 'gallery_icons'),
-          TPath.Combine(LOut, 'icons'));
+  { Category icons are copied on demand per referencing category — see
+    CopyCategoryIcon, called from BuildRootPage. }
 end;
 
 { Returns a relative URL from AFromDir (the page's directory, forward-slash,
@@ -440,7 +473,10 @@ begin
         from assets/icons/.  Fall back to the first album's photo cover. }
       var LThumbUrl: string := '';
       if LCat.AlbumThumb <> '' then
-        LThumbUrl := 'assets/icons/' + TPath.GetFileName(LCat.AlbumThumb)
+      begin
+        LThumbUrl := 'assets/icons/' + TPath.GetFileName(LCat.AlbumThumb);
+        CopyCategoryIcon(LCat.AlbumThumb);
+      end
       else if LCat.Albums.Count > 0 then
         LThumbUrl := AlbumCoverThumbUrl(LCat.Albums[0], '');
 
