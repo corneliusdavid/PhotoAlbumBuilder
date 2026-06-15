@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="@page.Description">
+  <meta name="author" content="@site.AuthorName">
+  <meta name="robots" content="@site.RobotsTags">
+  <meta name="referrer" content="origin-when-cross-origin">
+  <title>@page.Title</title>
+  <link rel="icon" href="@base.Assets/favicon.ico">
+  <link rel="shortcut icon" href="@base.Assets/favicon.ico">
+  <link rel="stylesheet" href="@base.Assets/css/font-awesome.min.css">
+  <link rel="stylesheet" href="@base.Assets/css/source-sans-pro.css">
+  <link rel="stylesheet" href="@base.Assets/css/magnific-popup.css">
+  <link rel="stylesheet" href="@base.Assets/css/main.css">
+  <link rel="stylesheet" href="@base.Assets/css/user.css">
+  @RenderHeader
+</head>
+<body class="loading">
+  <div id="wrapper">
+    @Import _header.html
+    <div id="main">
+      @RenderBody
+    </div>
+    @Import _footer.html
+  </div>
+  <script src="@base.Assets/js/jquery.min.js"></script>
+  <script src="@base.Assets/js/jquery.magnific-popup.js"></script>
+  <script src="@base.Assets/js/main.js"></script>
+  <script src="@base.Assets/js/util.js"></script>
+</body>
+</html>

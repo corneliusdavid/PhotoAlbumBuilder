@@ -1,0 +1,13 @@
+@LayoutPage "base.html"
+<div class="flexrow">
+  @ForEach(var col in page.Columns) {
+    <div class="flexcol">
+      @ForEach(var item in col.Items) {
+        <article class="thumb">
+          <a href="@item.URL" class="link" tabindex="0"><img src="@item.ThumbURL" alt="@item.Title"></a>
+          <h2>@item.Title</h2>
+        </article>
+      }
+    </div>
+  }
+</div>

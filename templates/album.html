@@ -1,0 +1,26 @@
+@LayoutPage "base.html"
+<div class="flexrow">
+  @ForEach(var col in page.Columns) {
+    <div class="flexcol">
+      @ForEach(var photo in col.Photos) {
+        <article class="thumb">
+          <a class="gallery-item"
+              phototitle="@photo.PhotoTitle"
+              description="@photo.Description"
+              gallery_index="@photo.GalleryIndex"
+              id="@photo.ID"
+              downloadable="true"
+              download_file="@photo.FullURL"
+              orig_name="@photo.OrigName"
+              href="@photo.FullURL">
+            <div id="image_number_@photo.GalleryIndex" class="gallery-item-marker"></div>
+            <img src="@photo.ThumbURL" alt="@photo.PhotoTitle">
+          </a>
+          @if photo.HasTitle {
+            <h2>@photo.PhotoTitle</h2>
+          }
+        </article>
+      }
+    </div>
+  }
+</div>

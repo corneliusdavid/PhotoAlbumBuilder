@@ -1,0 +1,20 @@
+<header id="header">
+  <h1>
+    <a href="@base.Root"><strong>@site.Title</strong></a>
+    @ForEach(var crumb in page.Breadcrumbs) {
+      @if crumb.IsLink {
+        / <a href="@crumb.URL"><strong>@crumb.Title</strong></a>
+      }
+      @else {
+        / @crumb.Title
+      }
+    }
+  </h1>
+  <nav>
+    <ul>
+      @ForEach(var link in site.HeaderLinks) {
+        <li><a href="@link.URL" class="icon @link.Icon">@link.Name</a></li>
+      }
+    </ul>
+  </nav>
+</header>
