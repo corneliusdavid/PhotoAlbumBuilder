@@ -19,11 +19,12 @@ begin
   Writeln('Usage: PhotoAlbumBuilder [options]');
   Writeln;
   Writeln('Options:');
-  Writeln('  --config  <path>   Path to config.toml  (default: .\WebFramework\config.toml)');
-  Writeln('  --content <path>   Path to content root (default: .\WebFramework\content)');
-  Writeln('  --assets  <path>   Path to photo assets (default: E:\web\www.corneliusconcepts.pictures\assets)');
-  Writeln('  --theme   <path>   Hugo theme root      (default: .\WebFramework\themes\autophugo)');
-  Writeln('  --output  <path>   Output directory     (default: .\output)');
+  Writeln('  --config    <path>  Path to config.toml  (default: .\config.toml)');
+  Writeln('  --content   <path>  Path to content root (default: .\content)');
+  Writeln('  --assets    <path>  Path to photo assets (default: .\assets)');
+  Writeln('  --theme     <path>  Hugo theme root      (default: .\themes\autophugo)');
+  Writeln('  --templates <path>  HTML template root   (default: .\templates)');
+  Writeln('  --output    <path>  Output directory     (default: .\output)');
   Writeln('  --force            Rebuild all pages + copy static assets (CSS/JS/fonts)');
   Writeln('  --dry-run          Parse and plan without writing any files');
 end;
@@ -52,6 +53,7 @@ begin
       Writeln('Content    : ', Config.ContentPath);
       Writeln('Assets     : ', Config.AssetsPath);
       Writeln('Theme      : ', Config.ThemePath);
+      Writeln('Templates  : ', Config.TemplatesPath);
       Writeln('Output     : ', Config.OutputPath);
       Writeln('Thumb      : ', Config.ThumbWidth, 'px @ ', Config.ThumbQuality, '%');
       Writeln('Columns    : ', Config.ColumnCount);

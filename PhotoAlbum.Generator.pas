@@ -538,10 +538,7 @@ begin
   inherited Create;
   FConfig        := AConfig;
   FTree          := ATree;
-  FTemplatesPath := TPath.Combine(
-                      TPath.GetDirectoryName(
-                        TPath.GetFullPath(ParamStr(0))),
-                      'templates');
+  FTemplatesPath := AConfig.TemplatesPath;
 end;
 
 procedure TGenerator.Run;

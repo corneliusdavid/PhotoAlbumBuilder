@@ -18,6 +18,7 @@ type
     FOutputPath:    string;
     FConfigPath:    string;
     FThemePath:     string;
+    FTemplatesPath: string;
     FDryRun:        Boolean;
     FForceRebuild:  Boolean;
     FThumbWidth:    Integer;
@@ -40,6 +41,7 @@ type
     property OutputPath:   string    read FOutputPath;
     property ConfigPath:   string    read FConfigPath;
     property ThemePath:    string    read FThemePath;
+    property TemplatesPath: string   read FTemplatesPath;
     property DryRun:       Boolean   read FDryRun;
     property ForceRebuild: Boolean   read FForceRebuild;
     property ThumbWidth:   Integer   read FThumbWidth;
@@ -125,12 +127,13 @@ procedure TAppConfig.SetDefaults;
 var
   LBase: string;
 begin
-  { Default paths relative to the executable location }
-  LBase        := TPath.GetDirectoryName(TPath.GetFullPath(ParamStr(0)));
-  FConfigPath  := TPath.Combine(LBase, 'WebFramework\config.toml');
-  FContentPath := TPath.Combine(LBase, 'WebFramework\content');
-  FAssetsPath  := 'E:\web\www.corneliusconcepts.pictures\assets';
-  FThemePath   := TPath.Combine(LBase, 'WebFramework\themes\autophugo');
+  { Default paths relative to the current working directory }
+  LBase        := TDirectory.GetCurrentDirectory;
+  FConfigPath  := TPath.Combine(LBase, 'config.toml');
+  FContentPath := TPath.Combine(LBase, 'content');
+  FAssetsPath  := TPath.Combine(LBase, 'assets');
+  FThemePath   := TPath.Combine(LBase, 'themes\autophugo');
+  FTemplatesPath := TPath.Combine(LBase, 'templates');
   FOutputPath  := TPath.Combine(LBase, 'output');
 end;
 
@@ -157,6 +160,11 @@ begin
     begin
       Inc(I);
       FThemePath := ParamStr(I);
+    end
+    else if (LArg = '--templates') and (I < ParamCount) then
+    begin
+      Inc(I);
+      FTemplatesPath := ParamStr(I);
     end
     else if (LArg = '--output') and (I < ParamCount) then
     begin
