@@ -55,7 +55,12 @@ type
     function AlbumCoverThumbUrl(AAlbum: TAlbumMeta;
                                 const AFromRelPath: string): string;
 
-    { Copies CSS/JS/font files from the Hugo theme into output\assets\.
+    { Mirrors the theme's assets\ tree into output\assets\, copying each file
+      only when it is missing, the theme copy is newer, or --force is set.
+      Runs on every build (it is cheap and idempotent). }
+    procedure SyncThemeAssets;
+
+    { Copies theme fonts and category icons into output\assets\.
       Only called when --force is set. }
     procedure CopyStaticAssets;
 
@@ -111,6 +116,51 @@ end;
 
 { ── Static asset copy ────────────────────────────────────────────────────── }
 
+procedure TGenerator.SyncThemeAssets;
+var
+  LSrcRoot:  string;
+  LDestRoot: string;
+  LFiles:    TArray<string>;
+  LSrc:      string;
+  LRel:      string;
+  LDest:     string;
+  LCopied:   Integer;
+  LSkipped:  Integer;
+begin
+  LSrcRoot  := TPath.Combine(FConfig.ThemePath, 'assets');
+  LDestRoot := TPath.Combine(FConfig.OutputPath, 'assets');
+
+  if not TDirectory.Exists(LSrcRoot) then
+  begin
+    Writeln('  warning: theme assets not found: ', LSrcRoot);
+    Exit;
+  end;
+
+  Writeln('Syncing theme assets...');
+  LFiles  := TDirectory.GetFiles(LSrcRoot, '*', TSearchOption.soAllDirectories);
+  LCopied := 0;
+  LSkipped := 0;
+  for LSrc in LFiles do
+  begin
+    LRel  := LSrc.Substring(Length(LSrcRoot)).TrimLeft([TPath.DirectorySeparatorChar]);
+    LDest := TPath.Combine(LDestRoot, LRel);
+
+    if FConfig.ForceRebuild or
+       not TFile.Exists(LDest) or
+       (TFile.GetLastWriteTimeUtc(LSrc) > TFile.GetLastWriteTimeUtc(LDest)) then
+    begin
+      TDirectory.CreateDirectory(TPath.GetDirectoryName(LDest));
+      TFile.Copy(LSrc, LDest, {overwrite=}True);
+      Inc(LCopied);
+    end
+    else
+      Inc(LSkipped);
+  end;
+
+  Writeln(Format('  theme assets: %d copied, %d up to date -> %s',
+                 [LCopied, LSkipped, LDestRoot]));
+end;
+
 procedure TGenerator.CopyStaticAssets;
 
   { Copy every file in ASrcDir into ADestDir, creating ADestDir if needed.
@@ -145,13 +195,8 @@ begin
 
   Writeln('Copying static theme assets...');
 
-  { CSS }
-  CopyDir(TPath.Combine(LTheme, TPath.Combine('assets', 'css')),
-          TPath.Combine(LOut, 'css'));
-
-  { JS }
-  CopyDir(TPath.Combine(LTheme, TPath.Combine('assets', 'js')),
-          TPath.Combine(LOut, 'js'));
+  { CSS and JS live under the theme's assets\ tree and are handled by
+    SyncThemeAssets; only fonts (theme\static) and icons are copied here. }
 
   { FontAwesome + other root-level webfonts }
   CopyDir(TPath.Combine(LTheme, TPath.Combine('static', 'fonts')),
@@ -553,7 +598,11 @@ begin
     LManifest.Load(TPath.Combine(FConfig.OutputPath, '.manifest.json'));
     LManifest.PurgeAbsent(FTree.Categories);
 
-    { ── Static theme assets (CSS/JS/fonts) — only on --force ────────────── }
+    { ── Theme assets (CSS/JS/etc.) — incremental, every build ───────────── }
+    if not FConfig.DryRun then
+      SyncThemeAssets;
+
+    { ── Theme fonts + category icons — only on --force ──────────────────── }
     if FConfig.ForceRebuild and not FConfig.DryRun then
       CopyStaticAssets;
 
