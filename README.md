@@ -87,10 +87,10 @@ output/
   tags/index.html
   locations/index.html
   assets/
-    css/                      ← copied from theme on --force
-    js/                       ← copied from theme on --force
-    fonts/                    ← copied from theme on --force
-    icons/                    ← category icon PNGs, copied on --force
+    css/                      ← synced from theme\assets every build (copy-if-newer)
+    js/                       ← synced from theme\assets every build (copy-if-newer)
+    fonts/                    ← copied from theme\static on --force
+    icons/                    ← category icon PNGs, copied on demand per category
   <category>/
     index.html                ← album grid for this category
     <album>/
@@ -108,26 +108,35 @@ output/
 PhotoAlbumBuilder [options]
 
 Options:
-  --config  <path>   Path to config.toml                (default: .\WebFramework\config.toml)
-  --content <path>   Path to content root               (default: .\WebFramework\content)
-  --assets  <path>   Path to photo assets               (default: site-specific)
-  --theme   <path>   Hugo theme root                    (default: .\WebFramework\themes\autophugo)
-  --output  <path>   Output directory                   (default: .\output)
-  --force            Rebuild all pages + copy static assets (CSS/JS/fonts/icons)
-  --dry-run          Parse and plan without writing any files
+  --config    <path>  Path to config.toml   (default: .\config.toml)
+  --content   <path>  Path to content root  (default: .\content)
+  --assets    <path>  Path to photo assets  (default: .\assets)
+  --theme     <path>  Hugo theme root       (default: .\themes\autophugo)
+  --templates <path>  HTML template root    (default: .\templates)
+  --output    <path>  Output directory      (default: .\output)
+  --force             Rebuild all pages + force a full re-copy of static assets
+  --dry-run           Parse and plan without writing any files
 ```
+
+> All default paths are resolved relative to the **current working directory**
+> (the folder you run the program from), not the executable's location. Any path
+> may be overridden with its flag, or via `config.toml` where supported.
 
 ### Typical workflow
-
-**First run or after template/CSS changes:**
-```
-PhotoAlbumBuilder --force
-```
 
 **Incremental rebuild after adding photos to one or more albums:**
 ```
 PhotoAlbumBuilder
 ```
+Every build also syncs changed theme CSS/JS and copies any newly referenced
+category icons, so a plain run keeps assets current without `--force`.
+
+**Force a full rebuild of every page and a complete asset re-copy:**
+```
+PhotoAlbumBuilder --force
+```
+Use this after editing theme fonts, or any time you want to overwrite the
+entire `output/assets/` tree regardless of timestamps.
 
 **Check what would be built without touching any files:**
 ```
@@ -178,7 +187,8 @@ icon  = "fa-instagram"
 
 ## Templates
 
-Templates live in a `templates/` folder alongside the executable.
+Templates live in a `templates/` folder under the current working directory by
+default (override with `--templates <path>`).
 
 | File | Purpose |
 |---|---|
@@ -217,14 +227,17 @@ Asset paths in templates use the `@base` variable, which is depth-adjusted so th
 
 ## Static Assets
 
-The CSS, JavaScript, web fonts, and category icons are **not** generated — they come from your Hugo theme and must be present in `output/assets/` for the site to display correctly.
+The CSS, JavaScript, web fonts, and category icons are **not** generated — they come from your Hugo theme and photo assets, and are placed in `output/assets/` so the site displays correctly. Each source is handled differently:
 
-Run `PhotoAlbumBuilder --force` once after setting up your output folder and the builder will copy everything automatically:
+| Source | Destination | When |
+|---|---|---|
+| `{theme}/assets/` (whole tree, incl. `css/`, `js/`) | `output/assets/` | **Every build**, copy-if-newer (or all files on `--force`) |
+| `{theme}/static/fonts/` | `output/assets/fonts/` | On `--force` only |
+| `{assets}/gallery_icons/<icon>` | `output/assets/icons/` | **On demand** — only icons referenced by a category's `albumthumb`, copy-if-newer |
 
-- `{theme}/assets/css/` → `output/assets/css/`
-- `{theme}/assets/js/` → `output/assets/js/`
-- `{theme}/static/fonts/` → `output/assets/fonts/`
-- `{assets}/gallery_icons/` → `output/assets/icons/`
+The whole `{theme}/assets/` tree is mirrored, so adding files to the theme picks them up automatically on the next build without `--force`. Category icons are detected from content (like album photos are) rather than bulk-copied, so only icons actually used by a category are copied.
+
+> To clear out assets that are no longer referenced, delete `output/assets/` and run a build — it will be re-synced from scratch.
 
 ---
 
