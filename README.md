@@ -1,9 +1,10 @@
 # PhotoAlbumBuilder
 
-A fast, incremental static site generator for family photo albums, written in Delphi.  
-Built as a replacement for a Hugo-based photo site that had grown to 26,000 files and multi-hour build times.
+A fast, incremental static site generator for family photo albums, written in Delphi. 
 
-> Note: Except for this paragraph, the entire application and this README were written by Claude Code with very few corrections (used `published` instead of `public` in project-level classes; didn't use `CharInSet` for checking characters in a set; remove `inline` in a couple of places).
+Built as a replacement for a [Hugo](https://gohugo.io/)-based photo site that had grown to 26,000 files and multi-hour build times. The Hugo static site generator is great for small to medium sized informational sites but for this particular theme, it creates 7 copies of every image in the photo gallery, supposedly to support different resolutions. But with several years worth of photos of our family and thousands of pictures, it was just taking too long to regenerate the files and pages--and it would regenerate _every single page_!  This Delphi program updates a site in a fraction of the time and uses a quarter of the space for the resulting website.
+
+> Note: Except for this and the previous paragraph, the entire application and this README were written by Claude Code with very few corrections (used `published` instead of `public` in project-level classes; didn't use `CharInSet` for checking characters in a set; remove `inline` in a couple of places).
 
 ---
 
